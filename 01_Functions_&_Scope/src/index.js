@@ -99,6 +99,7 @@ function helloFriend(nameStr) {
 
 // ✅ create an arrow function version of the formatPrice function
 const formatPrice = (price) => '$' + Number.parseFloat(price).toFixed(2)
+const formatEuro = price => '€'  + Number.parseFloat(price).toFixed(2)
 
 const formattedPrice = formatPrice(inventory[0].price)
 console.log("🚀 ~ file: index.js:88 ~ formattedPrice:", formattedPrice)
@@ -148,19 +149,75 @@ function findHighestPricedBook(inventoryArr){
 
 // After Break
 
-// ✅ Create a function called `log` that takes a function and its argument as arguments
-// and logs a message explaining the name of the function, the argument passed and 
-// the return value 
-
 // 💡 Practice using callbacks for iteration
 
+const prices = [23, 41, 19, 9.35, 11.15]
+
+function formatAsCurrency(priceArr, formatterCb){
+    for (let i=0; i < priceArr.length; i++) {
+        const currPrice = priceArr[i]
+        const formattedPrice = formatterCb(currPrice)
+        console.log(formattedPrice)
+    }
+}
+formatAsCurrency(prices, formatPrice)
+formatAsCurrency(prices, formatEuro)
+
 // ✅ Create an array of the prices of all of the books
+function getBookPrice(bookObj){
+    return bookObj.price
+}
+const bookPrices = inventory.map((bookObj) => bookObj.price)
+// const bookPrices = inventory.map(getBookPrice)
+console.log("🚀 ~ file: index.js:168 ~ bookPrices:", bookPrices)
+
 
 // ✅ Create an array of simplified book objects (title, author, price)
+const simplifiedBooks = inventory.map(bookObj => {
+    return {
+        title: bookObj.title,
+        author: bookObj.author,
+        price: formatPrice(bookObj.price)
+    }
+})
+console.log("🚀 ~ file: index.js:183 ~ simplifiedBooks ~ simplifiedBooks:", simplifiedBooks)
+
 
 // ✅ Create an array of strings from the inventory in the following format:
 // 'Eloquent JavaScript: A Modern Introduction to Programming by Marjin Haverbeke is on sale for $10.00'
+const allBlurbs = inventory.map(bookObj => blurb(bookObj))
+console.log("🚀 ~ file: index.js:189 ~ allBlurbs:", allBlurbs)
 
 // 💡 When do I use forEach vs map?
 // forEach when I just want to call a function on every element in an array
 // map is when I want to build a new array based on an existing array
+
+function printBlurbs(){
+    inventory.forEach(book => console.log(blurb(book)))
+}
+printBlurbs()
+
+// >>>>>>>>>>>>>>>>>>>>>>>>
+// Building a map function from scratch 
+// >>>>>>>>>>>>>>>>>>>>>>>>
+
+function myMap(array, cb){
+    const newArray = []
+    for (let elem of array){
+        newArray.push(cb(elem))
+    }
+    return newArray
+}
+
+const squareMe = num => num * num
+const cubeMe = num => num ** 3
+
+const squares = myMap([1, 2, 3, 4], squareMe)
+console.log(squares)
+const cubes = myMap([1, 2, 3, 4], cubeMe)
+console.log(cubes)
+
+// comparing with the built-in Array.prototype.map() function
+
+const squares2 = [5, 6 ,7].map(squareMe)
+console.log(squares2)
