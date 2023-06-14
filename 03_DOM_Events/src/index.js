@@ -53,6 +53,7 @@ function renderBook(book) {
 
   const btn = document.createElement('button');
   btn.textContent = 'Delete';
+  btn.addEventListener('click', () => li.remove())
   li.append(btn);
 
   document.querySelector('#book-list').append(li);
