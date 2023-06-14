@@ -1,6 +1,31 @@
+//////////////////////////////////////
+// Select elements (that will be referenced frequently)
+//////////////////////////////////////
+const toggleFormButton = document.querySelector('#toggleForm')
+const bookForm = document.querySelector("#book-form")
+
+//////////////////////////////////////
+// Helper functions
+//////////////////////////////////////
 function formatPrice(price) {
   return '$' + Number.parseFloat(price).toFixed(2);
 }
+
+function fillIn(form, data){
+    form.title.value = data.title
+    form.author.value = data.author
+    form.price.value = data.price
+    form.imageUrl.value = data.imageUrl
+    form.inventory.value = data.inventory
+}
+
+fillIn(bookForm, {
+  title: 'Designing Data-intensive Applications',
+  author: "Martin Kleppmann",
+  price: 22,
+  inventory: 1,
+  imageUrl: 'https://m.media-amazon.com/images/I/51ZSpMl1-LL._SX379_BO1,204,203,200_.jpg'
+})
 
 //////////////////////////////////////
 // render functions  (Data => Display)
@@ -58,7 +83,49 @@ function renderBook(book) {
 
   document.querySelector('#book-list').append(li);
 }
+////////////////////////////////////////////
+// Event listeners & handlers (Behavior -> (Data) -> Display)
+////////////////////////////////////////////
 
+function toggleBookForm() {
+  const isHidden = bookForm.classList.toggle('collapsed')
+  if (isHidden) {
+    toggleFormButton.textContent = "New Book"
+  } else {
+    toggleFormButton.textContent = "Hide Book Form"
+  }
+}
+
+toggleFormButton.addEventListener('click', toggleBookForm)
+
+function handleSubmit(event){
+  event.preventDefault();
+  console.dir(event.target)
+  console.log(event.target.title)
+  console.log(event.target.title.value)
+  const newBook = {
+    title: bookForm.title.value,
+    author: event.target.author.value,
+    price: event.target.price.value,
+    reviews: [],
+    inventory: event.target.inventory.value,
+    imageUrl: event.target.imageUrl.value
+  }
+  renderBook(newBook)
+}
+
+// sample book object
+// {
+//   id:1,
+//   title: 'Eloquent JavaScript: A Modern Introduction to Programming',
+//   author: 'Marjin Haverbeke',
+//   price: 10.00,
+//   reviews: [{userID: 1, content:'Good book, but not great for new coders'}],
+//   inventory: 10,
+//   imageUrl: 'https://images-na.ssl-images-amazon.com/images/I/51IKycqTPUL._SX218_BO1,204,203,200_QL40_FMwebp_.jpg',
+// }
+
+bookForm.addEventListener('submit', handleSubmit)
 
 ////////////////////////////////////////////
 // call render functions to populate the DOM
