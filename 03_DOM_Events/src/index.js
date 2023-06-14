@@ -1,3 +1,5 @@
+//document.addEventListener("DOMContentLoaded", () => {// your logic here})
+
 //////////////////////////////////////
 // Select elements (that will be referenced frequently)
 //////////////////////////////////////
@@ -111,7 +113,9 @@ function handleSubmit(event){
     inventory: event.target.inventory.value,
     imageUrl: event.target.imageUrl.value
   }
-  renderBook(newBook)
+  renderBook(newBook) // bypassing data, going straight to display
+  event.target.reset() // nice to have for user
+  toggleBookForm() // nice to have to UI
 }
 
 // sample book object
@@ -126,6 +130,14 @@ function handleSubmit(event){
 // }
 
 bookForm.addEventListener('submit', handleSubmit)
+
+document.addEventListener('keydown', (e) => {
+  console.log(e.key)
+  const isVisible = !bookForm.classList.contains('collapsed')
+  if (isVisible && e.code == "Escape") {
+    toggleBookForm()
+  }
+})
 
 ////////////////////////////////////////////
 // call render functions to populate the DOM
