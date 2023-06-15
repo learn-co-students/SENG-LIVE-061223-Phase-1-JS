@@ -2,5 +2,16 @@
   "posts": [
     { "title": "JSON-server is really cool" },
     { "title": "JSON-server allows you to mock an API server by creating a single file!"}
+  ],
+  "snacks": [
+    { 
+      "id": 1,
+      "name": "Animal crackers",
+      "category": "cookie"
+    },
+    { "id": 2,
+      "name": "Swedish fish",
+      "catgory": "gummies"
+    }
   ]
 }

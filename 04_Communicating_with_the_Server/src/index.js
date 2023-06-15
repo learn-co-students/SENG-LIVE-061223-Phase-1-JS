@@ -71,6 +71,14 @@ function renderBook(book) {
   document.querySelector('#book-list').append(li);
 }
 
+function renderError(error) {
+  console.log("🚀 ~ file: index.js:85 ~ renderError ~ error:", error.message)
+  const errDiv = document.createElement('div');
+  errDiv.classList.add('error')
+  errDiv.textContent = error.message
+  document.querySelector('main').prepend(errDiv)
+}
+
 
 ////////////////////////////////////////////////////////////////
 // Event Listeners/Handlers (Behavior => Data => Display)
@@ -126,9 +134,44 @@ bookForm.addEventListener('submit', (e) => {
 // call render functions to populate the DOM
 ////////////////////////////////////////////
 
-renderHeader(bookStore)
-renderFooter(bookStore)
-bookStore.inventory.forEach(renderBook)
+// renderHeader(bookStore)
+// renderFooter(bookStore)
+// bookStore.inventory.forEach(renderBook)
 
+////////////////////////////////////////////
+// Communicating with the Server (via .fetch) -> then update the DOM
+////////////////////////////////////////////
 
+// const request = fetch('http://localhost:3000/books') // returns a Promise
+// console.log("🚀 ~ file: index.js:138 ~ request:", request)
+// request
+//   .then(response => { // handle Promise resolution with .then
+//     console.log("🚀 ~ file: index.js:141 ~ response:", response)
+//     return response.json() // .json also returns a Promise
+//   })
+//   .then(data => console.log(data))
 
+fetch('http://localhost:3000/books')
+  .then(res => res.json())
+  .then(booksArr => {
+    console.log("🚀 ~ file: index.js:149 ~ booksArr:", booksArr)
+    booksArr.forEach(renderBook)
+  })
+  .catch(error => { // .catch only rescues from a request that gets no respons
+    console.log("🚀 ~ file: index.js:153 ~ error:", error) // responses, even with statuses 400-500s
+    renderError(error) // won't get handled here
+  })
+
+fetch('http://localhost:3000/stores/2')
+  .then(res => {
+    if (res.ok) { // any status codes outside of 200-300s will make .ok falsy
+      return res.json()
+    } else {
+      throw new Error(res.statusText) // raise a custom error to trigger .catch
+    }
+  })
+  .then(storeObj => {
+    renderHeader(storeObj)
+    renderFooter(storeObj)
+  })
+  .catch(renderError)
