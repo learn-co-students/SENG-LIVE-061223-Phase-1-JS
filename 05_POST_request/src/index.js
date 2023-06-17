@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////
 // Fetch Data & Call render functions to populate the DOM
 //////////////////////////////////////////////////////////
-getJSON('http://localhost:3000/stores')
+getJSON('http://localhost:3000/stores') // using a helper function to execute the fetch boilerplate
   .then((stores) => {
     // this populates a select tag with options so we can switch between stores on our web page
     renderStoreSelectionOptions(stores);
@@ -61,6 +61,7 @@ function addSelectOptionForStore(store) {
   // the options textContent will be what the user sees when choosing an option
   option.textContent = store.name;
   storeSelector.append(option);
+  return option
 }
 
 // function: renderBook(book)
@@ -217,13 +218,58 @@ bookForm.addEventListener('submit', (e) => {
     imageUrl: e.target.imageUrl.value
   }
   // pass the info as an argument to renderBook for display!
-  renderBook(book);
-  // 1. Add the ability to perist the book to the database when the form is submitted. When this works, we should still see the book that is added to the DOM on submission when we refresh the page.
 
-  e.target.reset();
+  // renderBook(book); // calling it here is optimistic
+
+  // 1. Add the ability to perist the book to the database when the form is submitted. When this works, we should still see the book that is added to the DOM on submission when we refresh the page.
+  const config = { // composing the config object that will configure the POST fetch
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(book)
+  }
+  fetch('http://localhost:3000/books', config) // we could use the postJSON function here, but we'll write out the 
+    .then(res => {        // fetch syntax to see it in the context of the submit handler
+      if (res.ok) {
+        return res.json()
+      } else {
+        throw (res.statusText)
+      }
+    })
+    .then(newBook => renderBook(newBook)) // pessimistic rendering
+    .catch(renderError)
+  e.target.reset(); // clear the form
 })
 
 // 2. Hook up the new Store form so it that it works to add a new store to our database and also to the DOM (as an option within the select tag)
+
+function handleStoreSubmit(e){  // writing this as a named standalone function to handle the store submission
+  e.preventDefault()
+
+  const newStore = {
+    name: e.target.name.value,
+    location: e.target.location.value,
+    number: e.target.number.value,
+    address: e.target.address.value,
+    hours: e.target.hours.value
+  }
+  // fetch + optimistic rendering
+  ///////////////////////////////
+  // const newOption = addSelectOptionForStore(newStore) // we can render optimistically
+  // postJSON('http://localhost:3000/stores', newStore)
+  //   .then(dbStore => {
+  //     newOption.value = dbStore.id // but we stil need to retrieve the id from the new db object and add it to the DOM
+  //   })
+
+  // fetch + pessimistic rendering
+  ///////////////////////////////////
+  postJSON('http://localhost:3000/stores', newStore) // this time we will use the helper function, which returns a Promise chain
+    .then(dbStore => addSelectOptionForStore(dbStore)) // so we can continue chaining another .then() onto it
+    .catch(renderError)
+}
+
+storeForm.addEventListener('submit', handleStoreSubmit) // passing our handler function as a callback
 
 // we're filling in the storeForm with some data
 // for a new store programatically so we don't 
@@ -235,6 +281,14 @@ fillIn(storeForm, {
   number: "555-555-5555",
   address: "555 Shangri-La",
   hours: "Monday - Friday 9am - 6pm"
+})
+
+fillIn(bookForm, {
+  title: "Designing Data-Intenseive Applications",
+  author: "Martin Kleppmann",
+  price: 22.20,
+  imageUrl: 'https://m.media-amazon.com/images/I/51ZSpMl1-LL._SX379_BO1,204,203,200_.jpg',
+  inventory: 1
 })
 
 

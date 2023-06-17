@@ -23,6 +23,22 @@
       "number": 5554443333,
       "name": "Tech BooksRus",
       "hours": "Thursday - Saturday 11am - 7pm"
+    },
+    {
+      "name": "BooksRUs",
+      "location": "LaLaLand",
+      "number": "555-555-5555",
+      "address": "555 Shangri-La",
+      "hours": "Monday - Friday 9am - 6pm",
+      "id": 4
+    },
+    {
+      "name": "BooksRUs",
+      "location": "LaLaLand",
+      "number": "555-555-5555",
+      "address": "555 Shangri-La",
+      "hours": "Monday - Friday 9am - 6pm",
+      "id": 5
     }
   ],
   "books": [
