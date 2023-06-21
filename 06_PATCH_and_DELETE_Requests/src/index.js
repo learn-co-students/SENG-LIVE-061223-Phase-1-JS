@@ -31,12 +31,14 @@ function renderFooter(bookStore) {
   document.querySelector('#address').textContent = bookStore.address;
   document.querySelector('#number').textContent = bookStore.number;
   document.querySelector('#store').textContent = bookStore.location;
+  document.querySelector('#hours').textContent = bookStore.hours;
 }
+
+// target the select tag
+// const storeSelector = document.querySelector('#store-selector');
 
 // adds options to a select tag that allows swapping between different stores
 function renderStoreSelectionOptions(stores) {
-  // target the select tag
-  const storeSelector = document.querySelector('#store-selector');
   // clear out any currently visible options
   storeSelector.innerHTML = "";
   // add an option to the select tag for each store
@@ -55,6 +57,7 @@ const storeSelector = document.querySelector('#store-selector');
 
 function addSelectOptionForStore(store) {
   const option = document.createElement('option');
+  // option.dataset.storeId = store.id // overkill because id assigned as value below
   // the option value will appear within e.target.value
   option.value = store.id;
   // the options textContent will be what the user sees when choosing an option
@@ -76,7 +79,7 @@ function addSelectOptionForStore(store) {
 function renderBook(book) {
   const li = document.createElement('li');
   li.className = 'list-li';
-  
+  li.dataset.bookId = book.id
   const h3 = document.createElement('h3');
   h3.textContent = book.title;
   li.append(h3);
@@ -95,6 +98,40 @@ function renderBook(book) {
   inventoryInput.value = book.inventory;
   inventoryInput.min = 0;
   li.append(inventoryInput);
+
+  // add code to update inventory
+  inventoryInput.addEventListener('change', (e) => {
+    console.log('new value', e.target.value)
+    // const config = {
+    //   method: "PATCH",
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({ inventory: parseInt(e.target.value)})
+    // }
+    // fetch(`http://localhost:3000/books/${book.id}`, config)
+    //   .then(res => res.json())
+    //   .then(updatedBook => {
+    //     if (updatedBook.inventory === 0) {
+    //       pStock.textContent = "Out of stock";
+    //     } else if (updatedBook.inventory < 3) {
+    //       pStock.textContent = "Only a few left!";
+    //     } else {
+    //       pStock.textContent = "In stock"
+    //     }
+    //   })
+    patchJSON(`http://localhost:3000/books/${book.id}`, { inventory: parseInt(e.target.value)})
+    .then(updatedBook => {
+          if (updatedBook.inventory === 0) {
+            pStock.textContent = "Out of stock";
+          } else if (updatedBook.inventory < 3) {
+            pStock.textContent = "Only a few left!";
+          } else {
+            pStock.textContent = "In stock"
+          }
+      })
+    .catch(renderError)
+  })
   
   const pStock = document.createElement('p');
   pStock.className = "grey";
@@ -116,7 +153,16 @@ function renderBook(book) {
   btn.textContent = 'Delete';
 
   btn.addEventListener('click', (e) => {
-    li.remove();
+    // add code to delete book from db
+    fetch(`http://localhost:3000/books/${book.id}`, { method: "DELETE"})
+      .then(res => {
+        if (res.ok){
+          li.remove()
+        } else {
+          renderError(res.statusText)
+        }
+      })
+    // li.remove();  // optimistic rendering
   })
   li.append(btn);
 
@@ -151,6 +197,7 @@ function fillIn(form, data) {
 // New Function to populate the store form with a store's data to update 
 function populateStoreEditForm(store) {
   const form = document.querySelector('#store-form');
+  form.dataset.storeId = store.id
   fillIn(form, store);
   showStoreForm();
 }
@@ -263,6 +310,24 @@ storeForm.addEventListener('submit', (e) => {
   
   if (storeEditMode) {
     // ✅ write code for updating the store here
+    const config = {
+      method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(store)
+    }
+    fetch(`http://localhost:3000/stores/${e.target.dataset.storeId}`, config)
+      .then(res => res.json())
+      .then(updatedStore => {
+        renderHeader(updatedStore) // pessimistic rendering 
+        renderFooter(updatedStore)
+        storeSelector.querySelector(`option[value="${updatedStore.id}"`).textContent = updatedStore.name
+        // return getJSON('http://localhost:3000/stores')
+      })
+      // .then(stores => {
+      //   renderStoreSelectionOptions(stores)
+      // })
     
   } else {
     postJSON("http://localhost:3000/stores", store)
@@ -282,5 +347,13 @@ editStoreBtn.addEventListener('click', (e) => {
   storeEditMode = true;
   getJSON(`http://localhost:3000/stores/${selectedStoreId}`)
     .then(populateStoreEditForm)
+})
+
+fillIn(bookForm, {
+  title: "Designing Data-Intenseive Applications",
+  author: "Martin Kleppmann",
+  price: 22.20,
+  imageUrl: 'https://m.media-amazon.com/images/I/51ZSpMl1-LL._SX379_BO1,204,203,200_.jpg',
+  inventory: 1
 })
 
